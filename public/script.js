@@ -51,7 +51,30 @@ $('#registerBtn').addEventListener('click',()=>{
     //     if doc.error, showError(doc.error)
     //     otherwise, openHomeScreen(doc)
     //   use .catch(err=>showError('ERROR: '+err)}) to show any other errors
-});
+    const doc = JSON.stringify(data);
+    fetch('/users', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: doc
+    })
+    .then(async (res) => {
+        const data = await res.json();
+        console.log(data);
+        if(!res.ok){
+            throw new Error(data.error);
+        }
+        return data
+    }) 
+    .then(data => {
+        console.log(data);
+        console.log(`Data: ${data}`);
+        openHomeScreen(data);
+    })
+    .catch(err => {
+        console.error(`Error: ${err.message}`)
+        showError(err.message);
+        });
+    });
 
 // Update button action
 $('#updateBtn').addEventListener('click',()=>{
@@ -86,6 +109,23 @@ $('#deleteBtn').addEventListener('click',()=>{
     //     if doc.error, showError(doc.error)
     //     otherwise, openLoginScreen()
     //   use .catch(err=>showError('ERROR: '+err)}) to show any other errors
+    const username =  $('#username').innerText;
+    console.log(username)
+    fetch(`/users/${username}`,{
+        method: "Delete",
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(async(res)=>{
+        const data = await res.json();
+        if(!res.ok){
+            throw new Error(data.error)
+        }
+        return data
+    })
+    .then(()=> openLoginScreen())
+    .catch(err => showError(err.message))
 });
 
 function showListOfUsers(){
@@ -96,6 +136,14 @@ function showListOfUsers(){
     //       you can do this by using a for-loop or, better yet, a forEach function:
     //         docs.forEach(showUserInList)
     //   use .catch(err=>showError('Could not get user list: '+err)}) to show any potential errors
+    fetch("/users")
+    .then(res=> res.json())
+    .then(data => {
+        data.forEach(element => {
+            showUserInList(element)
+        });
+    })
+    .catch(err => showError(err))
 }
 
 function showUserInList(doc){
