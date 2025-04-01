@@ -25,6 +25,24 @@ $('#loginBtn').addEventListener('click',()=>{
     //       call showError('Username and password do not match.')
     //     otherwise, call openHomeScreen(doc)
     //   use .catch(err=>showError('ERROR: '+err)}) to show any other errors
+    const username =  $('#loginUsername').value;
+    const userpassword =  $('#loginPassword').value
+    fetch(`/users/${username}`)
+    .then(async (res)=>{
+        const data = await res.json();
+        if(!res.ok){
+            throw new Error(data.error)
+        }
+        return data
+    })
+    .then((data)=>{
+        if(data.password === userpassword){
+            openHomeScreen(data)
+        }else{
+            showError("Password didn't match please try again")
+        }
+    })
+    .catch(err => showError(err.message))
 });
 
 // Register button action
@@ -96,6 +114,21 @@ $('#updateBtn').addEventListener('click',()=>{
     //     otherwise, if doc.ok,
     //       alert("Your name and email have been updated.");
     //   use .catch(err=>showError('ERROR: '+err)}) to show any other errors
+    const username =  $('#username').innerText;
+    fetch(`users/${username}`, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(async (res)=>{
+        const data = await res.json();
+        if(!res.ok){
+            throw new Error(data.error)
+        }
+        return data
+    })
+    .then((data)=> alert(data.message))
+    .catch(err => showError(err.message))
 });
 
 // Delete button action
